@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cricket Live Score Tracker</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+            animation: slideDown 0.6s ease;
+        }
+
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+        }
+
+        input, textarea, select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-family: 'Poppins', sans-serif;
+            transition: border-color 0.3s;
+        }
+
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 60px;
+        }
+
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            cursor: pointer;
+            font-weight: 600;
+            transition: transform 0.2s, box-shadow 0.2s;
+            width: 100%;
+        }
+
+        button:hover {
+            transform: scale(1.02);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        .match-item {
+            background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
+            border-left: 5px solid #667eea;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .match-item:hover {
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
+            transform: translateX(5px);
+        }
+
+        .match-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .team-name {
+            font-size: 1.1em;
+            font-weight: 700;
+            color: #333;
+        }
+
+        .score {
+            font-size: 1.3em;
+            font-weight: 800;
+            color: #667eea;
+        }
+
+        .match-status {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+
+        .status-live {
+            background: #ff4757;
+            color: white;
+            animation: pulse 1s infinite;
+        }
+
+        .status-completed {
+            background: #2ed573;
+            color: white;
+        }
+
+        .status-upcoming {
+            background: #ffa502;
+            color: white;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .innings-info {
+            font-size: 0.9em;
+            color: #666;
+            margin-top: 8px;
+        }
+
+        .delete-btn {
+            background: #ff4757;
+            padding: 8px 15px;
+            font-size: 0.9em;
+            width: auto;
+            margin-top: 10px;
+            transition: all 0.3s;
+        }
+
+        .delete-btn:hover {
+            background: #ff3838;
+        }
+
+        .empty-state {
+            text-align: center;
+            color: #999;
+            padding: 40px 20px;
+            font-size: 1.1em;
+        }
+
+        .success-message {
+            background: #2ed573;
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            animation: slideIn 0.4s ease;
+            display: none;
+        }
+
+        .success-message.show {
+            display: block;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        h2 {
+            color: #333;
+            margin-bottom: 20px;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .score-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+
+            header h1 {
+                font-size: 1.8em;
+            }
+
+            .match-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🏏 Cricket Live Score Tracker</h1>
+            <p>Manage and track cricket matches in real-time</p>
+        </header>
+
+        <div class="main-grid">
+            <!-- Add Match Form -->
+            <div class="card">
+                <h2>Add New Match</h2>
+                <div class="success-message" id="successMsg">✓ Match added successfully!</div>
+                
+                <div class="form-group">
+                    <label for="team1">Team 1 Name</label>
+                    <input type="text" id="team1" placeholder="e.g., India" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="team2">Team 2 Name</label>
+                    <input type="text" id="team2" placeholder="e.g., Australia" required>
+                </div>
+
+                <div class="score-grid">
+                    <div class="form-group">
+                        <label for="team1Score">Team 1 Score</label>
+                        <input type="number" id="team1Score" placeholder="Runs" value="0" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="team1Wickets">Wickets</label>
+                        <input type="number" id="team1Wickets" placeholder="Wickets" value="0" min="0" max="10">
+                    </div>
+                </div>
+
+                <div class="score-grid">
+                    <div class="form-group">
+                        <label for="team2Score">Team 2 Score</label>
+                        <input type="number" id="team2Score" placeholder="Runs" value="0" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="team2Wickets">Wickets</label>
+                        <input type="number" id="team2Wickets" placeholder="Wickets" value="0" min="0" max="10">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="overs">Overs Played</label>
+                    <input type="number" id="overs" placeholder="e.g., 15.3" step="0.1" value="0" min="0">
+                </div>
+
+                <div class="form-group">
+                    <label for="matchStatus">Match Status</label>
+                    <select id="matchStatus">
+                        <option value="live">Live</option>
+                        <option value="upcoming">Upcoming</option>
+                        <option value="completed">Completed</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="venue">Venue</label>
+                    <input type="text" id="venue" placeholder="Match venue" required>
+                </div>
+
+                <button onclick="addMatch()">Add Match</button>
+            </div>
+
+            <!-- Matches Display -->
+            <div class="card">
+                <h2>Live Matches</h2>
+                <div id="matchesList"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const STORAGE_KEY = 'cricketMatches';
+
+        function getMatches() {
+            const data = localStorage.getItem(STORAGE_KEY);
+            return data ? JSON.parse(data) : [];
+        }
+
+        function saveMatches(matches) {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(matches));
+        }
+
+        function addMatch() {
+            const team1 = document.getElementById('team1').value.trim();
+            const team2 = document.getElementById('team2').value.trim();
+            const team1Score = parseInt(document.getElementById('team1Score').value) || 0;
+            const team1Wickets = parseInt(document.getElementById('team1Wickets').value) || 0;
+            const team2Score = parseInt(document.getElementById('team2Score').value) || 0;
+            const team2Wickets = parseInt(document.getElementById('team2Wickets').value) || 0;
+            const overs = parseFloat(document.getElementById('overs').value) || 0;
+            const matchStatus = document.getElementById('matchStatus').value;
+            const venue = document.getElementById('venue').value.trim();
+
+            if (!team1 || !team2 || !venue) {
+                alert('Please fill in all required fields');
+                return;
+            }
+
+            const match = {
+                id: Date.now(),
+                team1,
+                team2,
+                team1Score,
+                team1Wickets,
+                team2Score,
+                team2Wickets,
+                overs,
+                matchStatus,
+                venue,
+                timestamp: new Date().toLocaleString()
+            };
+
+            const matches = getMatches();
+            matches.push(match);
+            saveMatches(matches);
+
+            showSuccessMessage();
+            clearForm();
+            displayMatches();
+        }
+
+        function deleteMatch(id) {
+            if (confirm('Delete this match?')) {
+                let matches = getMatches();
+                matches = matches.filter(m => m.id !== id);
+                saveMatches(matches);
+                displayMatches();
+            }
+        }
+
+        function updateScore(id) {
+            const matches = getMatches();
+            const match = matches.find(m => m.id === id);
+            
+            if (match) {
+                const newTeam1Score = prompt('New Team 1 Score:', match.team1Score);
+                if (newTeam1Score !== null) {
+                    match.team1Score = parseInt(newTeam1Score) || 0;
+                    saveMatches(matches);
+                    displayMatches();
+                }
+            }
+        }
+
+        function displayMatches() {
+            const matches = getMatches();
+            const matchesList = document.getElementById('matchesList');
+
+            if (matches.length === 0) {
+                matchesList.innerHTML = '<div class="empty-state">No matches yet. Add one to get started!</div>';
+                return;
+            }
+
+            matchesList.innerHTML = matches.reverse().map(match => `
+                <div class="match-item">
+                    <div class="match-header">
+                        <div>
+                            <div class="team-name">${match.team1}</div>
+                            <div class="score">${match.team1Score}/${match.team1Wickets}</div>
+                        </div>
+                        <div style="text-align: center; font-weight: 600; color: #666;">vs</div>
+                        <div style="text-align: right;">
+                            <div class="team-name">${match.team2}</div>
+                            <div class="score">${match.team2Score}/${match.team2Wickets}</div>
+                        </div>
+                    </div>
+                    <div class="innings-info">
+                        📍 ${match.venue} | 🏏 Overs: ${match.overs}
+                    </div>
+                    <div class="innings-info">
+                        ⏰ ${match.timestamp}
+                    </div>
+                    <span class="match-status status-${match.matchStatus}">${match.matchStatus.toUpperCase()}</span>
+                    <button class="delete-btn" onclick="deleteMatch(${match.id})">Delete</button>
+                </div>
+            `).join('');
+        }
+
+        function clearForm() {
+            document.getElementById('team1').value = '';
+            document.getElementById('team2').value = '';
+            document.getElementById('team1Score').value = '0';
+            document.getElementById('team1Wickets').value = '0';
+            document.getElementById('team2Score').value = '0';
+            document.getElementById('team2Wickets').value = '0';
+            document.getElementById('overs').value = '0';
+            document.getElementById('venue').value = '';
+            document.getElementById('matchStatus').value = 'live';
+        }
+
+        function showSuccessMessage() {
+            const msg = document.getElementById('successMsg');
+            msg.classList.add('show');
+            setTimeout(() => msg.classList.remove('show'), 3000);
+        }
+
+        // Initial display
+        displayMatches();
+    </script>
+</body>
+</html>
